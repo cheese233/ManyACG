@@ -75,9 +75,9 @@ func getPictureUrl(ctx *gin.Context, picture *types.Picture, quality string) str
 	if config.Cfg.API.Host != "" {
 		host = config.Cfg.API.Host
 	} else {
-		host = ctx.Request.Host
+		host = "//" + ctx.Request.Host
 	}
-	return "//" + host + "/api/v1/picture/file/" + picture.ID + "?quality=" + quality
+	return host + "/api/v1/picture/file/" + picture.ID + "?quality=" + quality
 }
 
 func ResponseDataFromArtwork(ctx *gin.Context, artwork *types.Artwork) *ArtworkResponseData {
