@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/krau/ManyACG/common"
+	"github.com/krau/ManyACG/config"
 	"github.com/krau/ManyACG/sources"
 	"github.com/krau/ManyACG/types"
 )
@@ -53,6 +54,7 @@ func ResponseFromArtwork(ctx *gin.Context, artwork *types.Artwork, isAuthorized 
 
 func getPictureUrl(ctx *gin.Context, picture *types.Picture, quality string) string {
 	var storageInfo *types.StorageDetail
+	var host string
 	switch quality {
 	case "thumbnail":
 		storageInfo = picture.StorageInfo.Thumb
@@ -69,7 +71,12 @@ func getPictureUrl(ctx *gin.Context, picture *types.Picture, quality string) str
 	if storageInfo.Type == types.StorageTypeAlist {
 		return common.ApplyApiPathRule(storageInfo.Path)
 	}
-	host := ctx.Request.Host
+
+	if config.Cfg.API.Host != "" {
+		host = config.Cfg.API.Host
+	} else {
+		host = ctx.Request.Host
+	}
 	return "//" + host + "/api/v1/picture/file/" + picture.ID + "?quality=" + quality
 }
 
@@ -105,13 +112,13 @@ func ResponseDataFromArtwork(ctx *gin.Context, artwork *types.Artwork) *ArtworkR
 }
 
 func ResponseFromArtworks(ctx *gin.Context, artworks []*types.Artwork, isAuthorized bool) *common.RestfulCommonResponse[any] {
-	if isAuthorized {
-		return &common.RestfulCommonResponse[any]{
-			Status:  http.StatusOK,
-			Message: "Success",
-			Data:    artworks,
-		}
-	}
+	// if isAuthorized {
+	// 	return &common.RestfulCommonResponse[any]{
+	// 		Status:  http.StatusOK,
+	// 		Message: "Success",
+	// 		Data:    artworks,
+	// 	}
+	// }
 	responses := make([]*ArtworkResponseData, 0, len(artworks))
 	for _, artwork := range artworks {
 		responses = append(responses, ResponseDataFromArtwork(ctx, artwork))

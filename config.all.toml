@@ -157,6 +157,7 @@ sleep = 5
 enable = false
 # 监听地址
 address = "127.0.0.1:39088"
+host = "https://..."
 # CORS 允许来源
 allowed_origins = ["https://manyacg.top"]
 # API Key
