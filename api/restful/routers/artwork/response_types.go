@@ -32,16 +32,17 @@ type PictureResponse struct {
 	MessageID int    `json:"message_id"`
 	Thumbnail string `json:"thumbnail"`
 	Regular   string `json:"regular"`
+	Original  string `json:"original"`
 }
 
 func ResponseFromArtwork(artwork *types.Artwork, isAuthorized bool) *common.RestfulCommonResponse[any] {
-	if isAuthorized {
-		return &common.RestfulCommonResponse[any]{
-			Status:  http.StatusOK,
-			Message: "Success",
-			Data:    artwork,
-		}
-	}
+	// if isAuthorized {
+	// 	return &common.RestfulCommonResponse[any]{
+	// 		Status:  http.StatusOK,
+	// 		Message: "Success",
+	// 		Data:    artwork,
+	// 	}
+	// } // why?
 	return &common.RestfulCommonResponse[any]{
 		Status:  http.StatusOK,
 		Message: "Success",
@@ -52,14 +53,14 @@ func ResponseFromArtwork(artwork *types.Artwork, isAuthorized bool) *common.Rest
 func ResponseDataFromArtwork(artwork *types.Artwork) *ArtworkResponseData {
 	pictures := make([]*PictureResponse, len(artwork.Pictures))
 	for i, picture := range artwork.Pictures {
-		var thumbnail, regular string
+		var thumbnail, regular, original string
 		if picture.StorageInfo == nil || picture.StorageInfo.Thumb == nil {
 			thumbnail = picture.Thumbnail
 		} else {
 			if picture.StorageInfo.Thumb.Type == types.StorageTypeAlist {
 				thumbnail = common.ApplyApiPathRule(picture.StorageInfo.Thumb.Path)
 			} else {
-				thumbnail = picture.Thumbnail
+				thumbnail = "/api/v1/picture/file/" + picture.ID + "?quality=thumbnail"
 			}
 		}
 		if picture.StorageInfo == nil || picture.StorageInfo.Regular == nil {
@@ -68,7 +69,16 @@ func ResponseDataFromArtwork(artwork *types.Artwork) *ArtworkResponseData {
 			if picture.StorageInfo.Regular.Type == types.StorageTypeAlist {
 				regular = common.ApplyApiPathRule(picture.StorageInfo.Regular.Path)
 			} else {
-				regular = picture.Thumbnail
+				regular = "/api/v1/picture/file/" + picture.ID + "?quality=regular"
+			}
+		}
+		if picture.StorageInfo == nil || picture.StorageInfo.Original == nil {
+			original = picture.Thumbnail
+		} else {
+			if picture.StorageInfo.Original.Type == types.StorageTypeAlist {
+				original = common.ApplyApiPathRule(picture.StorageInfo.Original.Path)
+			} else {
+				original = "/api/v1/picture/file/" + picture.ID + "?quality=original"
 			}
 		}
 		pictures[i] = &PictureResponse{
@@ -81,6 +91,7 @@ func ResponseDataFromArtwork(artwork *types.Artwork) *ArtworkResponseData {
 			MessageID: picture.TelegramInfo.MessageID,
 			Thumbnail: thumbnail,
 			Regular:   regular,
+			Original:  original,
 		}
 	}
 	return &ArtworkResponseData{

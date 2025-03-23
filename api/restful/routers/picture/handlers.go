@@ -18,10 +18,27 @@ func GetFile(ctx *gin.Context) {
 	picture := ctx.MustGet("picture").(*types.Picture)
 	var data []byte
 	var err error
-	if picture.StorageInfo.Original != nil {
-		data, err = storage.GetFile(ctx, picture.StorageInfo.Original)
+	if quality := ctx.Query("quality"); quality != "" && picture.StorageInfo != nil {
+		// 根据 quality 参数选择对应的成员
+		var storageFile *types.StorageDetail
+		switch quality {
+		case "regular":
+			storageFile = picture.StorageInfo.Regular
+		case "original":
+			storageFile = picture.StorageInfo.Original
+		case "thumbnail":
+			storageFile = picture.StorageInfo.Thumb
+		}
+
+		if storageFile != nil {
+			data, err = storage.GetFile(ctx, storageFile)
+		}
 	} else {
-		data, err = common.DownloadWithCache(ctx, picture.Original, nil)
+		if picture.StorageInfo.Original != nil {
+			data, err = storage.GetFile(ctx, picture.StorageInfo.Original)
+		} else {
+			data, err = common.DownloadWithCache(ctx, picture.Original, nil)
+		}
 	}
 	if err != nil {
 		common.Logger.Errorf("Failed to get file: %v", err)
