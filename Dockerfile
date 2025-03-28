@@ -29,5 +29,5 @@ WORKDIR /opt/manyacg/
 RUN apk add --no-cache bash ca-certificates ffmpeg && update-ca-certificates
 
 COPY --from=builder /app/manyacg .
-
+EXPOSE 39080
 ENTRYPOINT ["./manyacg"]
