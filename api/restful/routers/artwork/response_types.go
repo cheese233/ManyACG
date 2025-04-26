@@ -131,6 +131,7 @@ func ResponseFromArtworks(ctx *gin.Context, artworks []*types.Artwork, isAuthori
 }
 
 type FetchedArtworkResponseData struct {
+	CacheID     string                    `json:"cache_id"`
 	Title       string                    `json:"title"`
 	Description string                    `json:"description"`
 	SourceURL   string                    `json:"source_url"`
@@ -156,15 +157,15 @@ type FetchedPictureResponse struct {
 	FileName  string `json:"file_name"`
 }
 
-func ResponseFromFetchedArtwork(artwork *types.Artwork) *common.RestfulCommonResponse[FetchedArtworkResponseData] {
+func ResponseFromFetchedArtwork(artwork *types.Artwork, cacheID string) *common.RestfulCommonResponse[FetchedArtworkResponseData] {
 	return &common.RestfulCommonResponse[FetchedArtworkResponseData]{
 		Status:  http.StatusOK,
 		Message: "Success",
-		Data:    ResponseDataFromFetchedArtwork(artwork),
+		Data:    ResponseDataFromFetchedArtwork(artwork, cacheID),
 	}
 }
 
-func ResponseDataFromFetchedArtwork(artwork *types.Artwork) FetchedArtworkResponseData {
+func ResponseDataFromFetchedArtwork(artwork *types.Artwork, cacheID string) FetchedArtworkResponseData {
 	pictures := make([]*FetchedPictureResponse, 0, len(artwork.Pictures))
 	for _, picture := range artwork.Pictures {
 		pictures = append(pictures, &FetchedPictureResponse{
@@ -183,6 +184,7 @@ func ResponseDataFromFetchedArtwork(artwork *types.Artwork) FetchedArtworkRespon
 		})
 	}
 	return FetchedArtworkResponseData{
+		CacheID:     cacheID,
 		Title:       artwork.Title,
 		Description: artwork.Description,
 		SourceURL:   artwork.SourceURL,
