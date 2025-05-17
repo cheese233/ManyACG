@@ -13,7 +13,7 @@ type sourceConfigs struct {
 
 type SourcePixivConfig struct {
 	Enable   bool           `toml:"enable" mapstructure:"enable" json:"enable" yaml:"enable"`
-	Proxy    string         `toml:"proxy" mapstructure:"proxy" json:"proxy" yaml:"proxy"`
+	Proxy    []string         `toml:"proxy" mapstructure:"proxy" json:"proxy" yaml:"proxy"`
 	URLs     []string       `toml:"urls" mapstructure:"urls" json:"urls" yaml:"urls"`
 	Intervel int            `toml:"intervel" mapstructure:"intervel" json:"intervel" yaml:"intervel"`
 	Sleep    uint           `toml:"sleep" mapstructure:"sleep" json:"sleep" yaml:"sleep"`

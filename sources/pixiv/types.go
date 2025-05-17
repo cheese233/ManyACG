@@ -3,6 +3,7 @@ package pixiv
 import (
 	"encoding/xml"
 	"errors"
+	"math/rand"
 	"regexp"
 	"strings"
 
@@ -93,7 +94,9 @@ var (
 	bookmarksTagsSuffix = []string{"入り", "bookmarks", "0收藏", "+ users", "加入书籤"}
 	htmlRe              = regexp.MustCompile("<[^>]+>")
 )
-
+func RandProxy() (string) {
+	return config.Cfg.Source.Pixiv.Proxy[rand.Intn(len(config.Cfg.Source.Pixiv.Proxy))];
+}
 func (resp *PixivAjaxResp) ToArtwork() (*types.Artwork, error) {
 	if resp.Err {
 		return nil, errors.New(resp.Message)
@@ -110,8 +113,8 @@ func (resp *PixivAjaxResp) ToArtwork() (*types.Artwork, error) {
 	for i, page := range illustPages.Body {
 		pictures = append(pictures, &types.Picture{
 			Index:     uint(i),
-			Thumbnail: strings.Replace(page.Urls.Small, "i.pximg.net", config.Cfg.Source.Pixiv.Proxy, 1),
-			Original:  strings.Replace(page.Urls.Original, "i.pximg.net", config.Cfg.Source.Pixiv.Proxy, 1),
+			Thumbnail: strings.Replace(page.Urls.Small, "i.pximg.net", RandProxy(), 1),
+			Original:  strings.Replace(page.Urls.Original, "i.pximg.net", RandProxy(), 1),
 			Width:     uint(page.Width),
 			Height:    uint(page.Height),
 		})

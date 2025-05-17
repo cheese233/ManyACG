@@ -3,6 +3,7 @@ package pixiv
 import (
 	"errors"
 	"fmt"
+
 	"net/http"
 	"path/filepath"
 	"regexp"
@@ -92,8 +93,8 @@ func (p *Pixiv) GetPictureInfo(sourceURL string, index uint) (*types.Picture, er
 	}
 	return &types.Picture{
 		Index:        index,
-		Thumbnail:    strings.Replace(resp.Body[index].Urls.Small, "i.pximg.net", config.Cfg.Source.Pixiv.Proxy, 1),
-		Original:     strings.Replace(resp.Body[index].Urls.Original, "i.pximg.net", config.Cfg.Source.Pixiv.Proxy, 1),
+		Thumbnail:    strings.Replace(resp.Body[index].Urls.Small, "i.pximg.net", RandProxy(), 1),
+		Original:     strings.Replace(resp.Body[index].Urls.Original, "i.pximg.net", RandProxy(), 1),
 		Width:        uint(resp.Body[index].Width),
 		Height:       uint(resp.Body[index].Height),
 		TelegramInfo: &types.TelegramInfo{},
