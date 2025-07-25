@@ -56,10 +56,18 @@ func Run(ctx context.Context) {
 				<head>
 					<meta charset="UTF-8">
 					<title>API</title>
+					<style>
+						.vert-center {
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							height: 100vh;
+						}
+					</style>
 					<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
 				</head>
-				<body class="ui middle aligned center aligned grid" style="height: 100vh; background: #f9fafb;">
-					<div class="column" style="max-width: 450px; margin: auto;">
+				<body
+					<div class="vert-center">
 						<div class="ui raised very padded text container segment">
 							<h1 class="ui header">Backend Service</h1>
 							<p class="ui grey text">A simple api to provide <a href="%s">%s</a></p>
