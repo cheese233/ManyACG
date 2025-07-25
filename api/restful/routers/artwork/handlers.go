@@ -43,7 +43,7 @@ func GetArtwork(ctx *gin.Context) {
 	// 		return
 	// 	}
 	// }
-	ctx.JSON(http.StatusOK, ResponseFromArtwork(artwork, hasKey))
+	ctx.JSON(http.StatusOK, ResponseFromArtwork(ctx, artwork, hasKey))
 }
 
 func GetArtworkCount(ctx *gin.Context) {

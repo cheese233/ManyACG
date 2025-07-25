@@ -41,7 +41,7 @@ func RandomArtworks(ctx *gin.Context) {
 		common.GinErrorResponse(ctx, errs.ErrNotFoundArtworks, http.StatusNotFound, "Artworks not found")
 		return
 	}
-	ctx.JSON(http.StatusOK, ResponseFromArtworks(artworks, hasKey))
+	ctx.JSON(http.StatusOK, ResponseFromArtworks(ctx, artworks, hasKey))
 }
 
 func RandomArtworkPreview(ctx *gin.Context) {
@@ -145,7 +145,7 @@ func GetArtworkList(ctx *gin.Context) {
 			common.GinErrorResponse(ctx, errs.ErrNotFoundArtworks, http.StatusNotFound, "Artworks not found")
 			return
 		}
-		ctx.JSON(http.StatusOK, ResponseFromArtworks(artworks, hasKey))
+		ctx.JSON(http.StatusOK, ResponseFromArtworks(ctx, artworks, hasKey))
 		return
 	}
 
@@ -162,7 +162,7 @@ func GetArtworkList(ctx *gin.Context) {
 		common.GinErrorResponse(ctx, errs.ErrNotFoundArtworks, http.StatusNotFound, "Artworks not found")
 		return
 	}
-	ctx.JSON(http.StatusOK, ResponseFromArtworks(artworks, hasKey))
+	ctx.JSON(http.StatusOK, ResponseFromArtworks(ctx, artworks, hasKey))
 }
 
 func getArtworkListByArtist(ctx *gin.Context, artistID primitive.ObjectID, r18Type types.R18Type, page, pageSize int64, adapterOption ...*types.AdapterOption) {
@@ -179,7 +179,7 @@ func getArtworkListByArtist(ctx *gin.Context, artistID primitive.ObjectID, r18Ty
 		common.GinErrorResponse(ctx, errs.ErrNotFoundArtworks, http.StatusNotFound, "Artworks not found")
 		return
 	}
-	ctx.JSON(http.StatusOK, ResponseFromArtworks(artworks, ctx.GetBool("auth")))
+	ctx.JSON(http.StatusOK, ResponseFromArtworks(ctx, artworks, ctx.GetBool("auth")))
 }
 
 func getArtworkListByTag(ctx *gin.Context, tag string, r18Type types.R18Type, page, pageSize int64, adapterOption ...*types.AdapterOption) {
@@ -196,7 +196,7 @@ func getArtworkListByTag(ctx *gin.Context, tag string, r18Type types.R18Type, pa
 		common.GinErrorResponse(ctx, errs.ErrNotFoundArtworks, http.StatusNotFound, "Artworks not found")
 		return
 	}
-	ctx.JSON(http.StatusOK, ResponseFromArtworks(artworks, ctx.GetBool("auth")))
+	ctx.JSON(http.StatusOK, ResponseFromArtworks(ctx, artworks, ctx.GetBool("auth")))
 }
 
 func getArtworkListByKeyword(ctx *gin.Context, keywordSlice [][]string, r18Type types.R18Type, page, pageSize int64, adapterOption ...*types.AdapterOption) {
@@ -213,7 +213,7 @@ func getArtworkListByKeyword(ctx *gin.Context, keywordSlice [][]string, r18Type 
 		common.GinErrorResponse(ctx, errs.ErrNotFoundArtworks, http.StatusNotFound, "Artworks not found")
 		return
 	}
-	ctx.JSON(http.StatusOK, ResponseFromArtworks(artworks, ctx.GetBool("auth")))
+	ctx.JSON(http.StatusOK, ResponseFromArtworks(ctx, artworks, ctx.GetBool("auth")))
 }
 
 func getArtworkListHybrid(ctx *gin.Context, queryText string, hybridSemanticRatio float64, offset, limit int64, r18Type types.R18Type, adapterOption ...*types.AdapterOption) {
@@ -230,5 +230,5 @@ func getArtworkListHybrid(ctx *gin.Context, queryText string, hybridSemanticRati
 		common.GinErrorResponse(ctx, errs.ErrNotFoundArtworks, http.StatusNotFound, "Artworks not found")
 		return
 	}
-	ctx.JSON(http.StatusOK, ResponseFromArtworks(artworks, ctx.GetBool("auth")))
+	ctx.JSON(http.StatusOK, ResponseFromArtworks(ctx, artworks, ctx.GetBool("auth")))
 }

@@ -177,15 +177,7 @@ func ConvertToFeedItems(ctx context.Context, artworks []*types.Artwork) []*feeds
     `,
 					html.EscapeString(artwork.Title),
 					html.EscapeString(func() string {
-						pic := artwork.Pictures[0]
-						if pic.StorageInfo == nil || pic.StorageInfo.Regular == nil {
-							return pic.Thumbnail
-						}
-						picUrl := common.ApplyApiStoragePathRule(pic.StorageInfo.Regular)
-						if picUrl == "" || picUrl == pic.StorageInfo.Regular.Path {
-							return pic.Thumbnail
-						}
-						return picUrl
+						return artwork.Pictures[0].Thumbnail
 					}()),
 					html.EscapeString(artwork.Title),
 					html.EscapeString(artwork.Description),

@@ -3,7 +3,9 @@ package artwork
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/krau/ManyACG/common"
+	"github.com/krau/ManyACG/config"
 	"github.com/krau/ManyACG/sources"
 	"github.com/krau/ManyACG/types"
 )
@@ -32,47 +34,55 @@ type PictureResponse struct {
 	MessageID int    `json:"message_id"`
 	Thumbnail string `json:"thumbnail"`
 	Regular   string `json:"regular"`
+	Original  string `json:"original"`
 }
 
-func ResponseFromArtwork(artwork *types.Artwork, isAuthorized bool) *common.RestfulCommonResponse[any] {
-	if isAuthorized {
-		return &common.RestfulCommonResponse[any]{
-			Status:  http.StatusOK,
-			Message: "Success",
-			Data:    artwork,
-		}
-	}
+func ResponseFromArtwork(ctx *gin.Context, artwork *types.Artwork, isAuthorized bool) *common.RestfulCommonResponse[any] {
+	// if isAuthorized {
+	// 	return &common.RestfulCommonResponse[any]{
+	// 		Status:  http.StatusOK,
+	// 		Message: "Success",
+	// 		Data:    artwork,
+	// 	}
+	// } // why?
 	return &common.RestfulCommonResponse[any]{
 		Status:  http.StatusOK,
 		Message: "Success",
-		Data:    ResponseDataFromArtwork(artwork),
+		Data:    ResponseDataFromArtwork(ctx, artwork),
 	}
 }
 
-func ResponseDataFromArtwork(artwork *types.Artwork) *ArtworkResponseData {
+func getPictureUrl(ctx *gin.Context, picture *types.Picture, quality string) string {
+	var storageInfo *types.StorageDetail
+	var host string
+	switch quality {
+	case "thumbnail":
+		storageInfo = picture.StorageInfo.Thumb
+	case "regular":
+		storageInfo = picture.StorageInfo.Regular
+	case "original":
+		storageInfo = picture.StorageInfo.Original
+	}
+
+	if picture.StorageInfo == nil || storageInfo == nil {
+		return picture.Thumbnail
+	}
+
+	if storageInfo.Type == types.StorageTypeAlist {
+		return common.ApplyApiPathRule(storageInfo.Path)
+	}
+
+	if config.Cfg.API.Host != "" {
+		host = config.Cfg.API.Host
+	} else {
+		host = "//" + ctx.Request.Host
+	}
+	return host + "/api/v1/picture/file/" + picture.ID + "?quality=" + quality
+}
+
+func ResponseDataFromArtwork(ctx *gin.Context, artwork *types.Artwork) *ArtworkResponseData {
 	pictures := make([]*PictureResponse, len(artwork.Pictures))
 	for i, picture := range artwork.Pictures {
-		var thumbnail, regular string
-		if picture.StorageInfo == nil || picture.StorageInfo.Thumb == nil {
-			thumbnail = picture.Thumbnail
-		} else {
-			picThumbUrl := common.ApplyApiStoragePathRule(picture.StorageInfo.Thumb)
-			if picThumbUrl == "" || picThumbUrl == picture.StorageInfo.Thumb.Path {
-				thumbnail = picture.Thumbnail
-			} else {
-				thumbnail = picThumbUrl
-			}
-		}
-		if picture.StorageInfo == nil || picture.StorageInfo.Regular == nil {
-			regular = picture.Thumbnail
-		} else {
-			picRegularUrl := common.ApplyApiStoragePathRule(picture.StorageInfo.Regular)
-			if picRegularUrl == "" || picRegularUrl == picture.StorageInfo.Regular.Path {
-				regular = picture.Thumbnail
-			} else {
-				regular = picRegularUrl
-			}
-		}
 		pictures[i] = &PictureResponse{
 			ID:        picture.ID,
 			Width:     picture.Width,
@@ -81,8 +91,9 @@ func ResponseDataFromArtwork(artwork *types.Artwork) *ArtworkResponseData {
 			Hash:      picture.Hash,
 			FileName:  picture.GetFileName(),
 			MessageID: picture.TelegramInfo.MessageID,
-			Thumbnail: thumbnail,
-			Regular:   regular,
+			Thumbnail: getPictureUrl(ctx, picture, "thumbnail"),
+			Regular:   getPictureUrl(ctx, picture, "regular"),
+			Original:  getPictureUrl(ctx, picture, "original"),
 		}
 	}
 	return &ArtworkResponseData{
@@ -100,17 +111,17 @@ func ResponseDataFromArtwork(artwork *types.Artwork) *ArtworkResponseData {
 	}
 }
 
-func ResponseFromArtworks(artworks []*types.Artwork, isAuthorized bool) *common.RestfulCommonResponse[any] {
-	if isAuthorized {
-		return &common.RestfulCommonResponse[any]{
-			Status:  http.StatusOK,
-			Message: "Success",
-			Data:    artworks,
-		}
-	}
+func ResponseFromArtworks(ctx *gin.Context, artworks []*types.Artwork, isAuthorized bool) *common.RestfulCommonResponse[any] {
+	// if isAuthorized {
+	// 	return &common.RestfulCommonResponse[any]{
+	// 		Status:  http.StatusOK,
+	// 		Message: "Success",
+	// 		Data:    artworks,
+	// 	}
+	// }
 	responses := make([]*ArtworkResponseData, 0, len(artworks))
 	for _, artwork := range artworks {
-		responses = append(responses, ResponseDataFromArtwork(artwork))
+		responses = append(responses, ResponseDataFromArtwork(ctx, artwork))
 	}
 	return &common.RestfulCommonResponse[any]{
 		Status:  http.StatusOK,
