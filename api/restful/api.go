@@ -66,13 +66,14 @@ func Run(ctx context.Context) {
 					</style>
 					<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
 				</head>
-				<body
+				<body>
 					<div class="vert-center">
 						<div class="ui raised very padded text container segment">
 							<h1 class="ui header">Backend Service</h1>
 							<p class="ui grey text">A simple api to provide <a href="%s">%s</a></p>
 						</div>
 					</div>
+					<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 					<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
 				</body>
 				</html>
