@@ -69,7 +69,7 @@ func getPictureUrl(ctx *gin.Context, picture *types.Picture, quality string) str
 	}
 
 	if storageInfo.Type == types.StorageTypeAlist {
-		return common.ApplyApiPathRule(storageInfo.Path)
+		return common.ApplyApiStoragePathRule(storageInfo)
 	}
 
 	if config.Cfg.API.Host != "" {
