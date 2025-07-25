@@ -31,8 +31,9 @@ func InitBot(ctx context.Context) {
 			Caller:       telegoapi.DefaultFastHTTPCaller,
 			MaxAttempts:  config.Cfg.Telegram.Retry.MaxAttempts,
 			ExponentBase: config.Cfg.Telegram.Retry.ExponentBase,
-			StartDelay:   time.Duration(config.Cfg.Telegram.Retry.StartDelay),
-			MaxDelay:     time.Duration(config.Cfg.Telegram.Retry.MaxDelay),
+			StartDelay:   time.Duration(config.Cfg.Telegram.Retry.StartDelay) * time.Second,
+			MaxDelay:     time.Duration(config.Cfg.Telegram.Retry.MaxDelay) * time.Second,
+			RateLimit:    telegoapi.RetryRateLimitWaitOrAbort,
 		}),
 	)
 	if err != nil {
@@ -190,5 +191,16 @@ func RunPolling(ctx context.Context) {
 			common.Logger.Panicf("Error when starting bot handler: %s", err)
 		}
 	}()
+	go startService()
+}
 
+func startService() {
+	go func() {
+		for params := range sendArtworkInfoCh {
+			if err := utils.SendArtworkInfo(params.Ctx, params.Bot, params.Params); err != nil {
+				common.Logger.Errorf("Error when sending artwork info: %s", err)
+			}
+			time.Sleep(time.Duration(config.Cfg.Telegram.Sleep) * time.Second)
+		}
+	}()
 }

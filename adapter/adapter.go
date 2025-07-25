@@ -176,7 +176,9 @@ func ConvertToFeedItems(ctx context.Context, artworks []*types.Artwork) []*feeds
         </article>
     `,
 					html.EscapeString(artwork.Title),
-					html.EscapeString(common.ApplyApiPathRule(artwork.Pictures[0].Original)),
+					html.EscapeString(func() string {
+						return artwork.Pictures[0].Thumbnail
+					}()),
 					html.EscapeString(artwork.Title),
 					html.EscapeString(artwork.Description),
 					html.EscapeString(artwork.Artist.Name),

@@ -143,7 +143,7 @@ func SendArtworkInfo(ctx context.Context, bot *telego.Bot, params *SendArtworkIn
 
 func getArtworkInfoReplyMarkup(ctx context.Context, artwork *types.Artwork, isCreated, hasPermission bool) (telego.ReplyMarkup, error) {
 	if isCreated {
-		baseKeyboard := GetPostedPictureInlineKeyboardButton(artwork, 0, ChannelChatID, BotUsername)
+		baseKeyboard := GetPostedArtworkInlineKeyboardButton(artwork, ChannelChatID, BotUsername)
 		if hasPermission {
 			return telegoutil.InlineKeyboard(
 				baseKeyboard,
@@ -209,11 +209,12 @@ func updatePreview(ctx context.Context, targetMessage *telego.Message, artwork *
 	if err != nil {
 		return err
 	}
-	if cachedArtwork.Status == types.ArtworkStatusPosted {
+	switch cachedArtwork.Status {
+	case types.ArtworkStatusPosted:
 		replyMarkup = GetPostedPictureReplyMarkup(artwork, pictureIndex, ChannelChatID, BotUsername)
-	} else if cachedArtwork.Status == types.ArtworkStatusCached {
+	case types.ArtworkStatusCached:
 		replyMarkup = targetMessage.ReplyMarkup
-	} else {
+	default:
 		mediaPhoto.WithCaption(photoParams.Caption + "\n<i>正在发布...</i>").WithParseMode(telego.ModeHTML)
 	}
 	if artwork.R18 {

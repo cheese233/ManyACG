@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -12,6 +14,7 @@ import (
 	"github.com/krau/ManyACG/config"
 	"github.com/krau/ManyACG/types"
 	"github.com/mymmrac/telego"
+	"github.com/mymmrac/telego/telegoapi"
 	"github.com/mymmrac/telego/telegoutil"
 )
 
@@ -26,7 +29,15 @@ func (t *TelegramStorage) Init(ctx context.Context) {
 	common.Logger.Infof("Initializing telegram storage")
 	ChatID = telegoutil.ID(config.Cfg.Storage.Telegram.ChatID)
 	var err error
-	Bot, err = telego.NewBot(config.Cfg.Storage.Telegram.Token, telego.WithAPIServer(config.Cfg.Storage.Telegram.ApiUrl))
+	Bot, err = telego.NewBot(config.Cfg.Storage.Telegram.Token, telego.WithAPIServer(config.Cfg.Storage.Telegram.ApiUrl),
+		telego.WithAPICaller(&telegoapi.RetryCaller{
+			Caller:       telegoapi.DefaultFastHTTPCaller,
+			MaxAttempts:  config.Cfg.Storage.Telegram.Retry.MaxAttempts,
+			ExponentBase: config.Cfg.Storage.Telegram.Retry.ExponentBase,
+			StartDelay:   time.Duration(config.Cfg.Storage.Telegram.Retry.StartDelay) * time.Second,
+			MaxDelay:     time.Duration(config.Cfg.Storage.Telegram.Retry.MaxDelay) * time.Second,
+			RateLimit:    telegoapi.RetryRateLimitWaitOrAbort,
+		}))
 	if err != nil {
 		common.Logger.Panicf("failed to create telegram bot: %s", err)
 	}
@@ -39,15 +50,31 @@ func (t *TelegramStorage) Init(ctx context.Context) {
 
 func (t *TelegramStorage) Save(ctx context.Context, filePath string, _ string) (*types.StorageDetail, error) {
 	common.Logger.Debugf("saving file %s", filePath)
+	var msg *telego.Message
+	var err error
 	fileBytes, err := os.ReadFile(filePath)
 	if err != nil {
 		common.Logger.Errorf("failed to read file: %s", err)
 		return nil, ErrReadFile
 	}
-	msg, err := Bot.SendDocument(ctx, telegoutil.Document(ChatID, telegoutil.File(telegoutil.NameReader(bytes.NewReader(fileBytes), filepath.Base(filePath)))))
+	for i := range config.Cfg.Storage.Telegram.Retry.MaxAttempts {
+		msg, err = Bot.SendDocument(ctx, telegoutil.Document(ChatID, telegoutil.File(telegoutil.NameReader(bytes.NewReader(fileBytes), filepath.Base(filePath)))))
+		if err != nil {
+			var apiErr *telegoapi.Error
+			if errors.As(err, &apiErr) && apiErr.ErrorCode == 429 && apiErr.Parameters != nil {
+				retryAfter := apiErr.Parameters.RetryAfter + (i * int(config.Cfg.Storage.Telegram.Retry.StartDelay))
+				common.Logger.Warnf("Rate limited, retry after %d seconds", retryAfter)
+				time.Sleep(time.Duration(retryAfter) * time.Second)
+				continue
+			}
+			common.Logger.Errorf("failed to send document: %s", err)
+			return nil, fmt.Errorf("failed to send document: %w", err)
+		}
+		break
+	}
 	if err != nil {
 		common.Logger.Errorf("failed to send document: %s", err)
-		return nil, ErrFailedSendDocument
+		return nil, fmt.Errorf("failed to send document: %w", err)
 	}
 	fileMessage := &fileMessage{
 		ChatID:     ChatID.ID,
