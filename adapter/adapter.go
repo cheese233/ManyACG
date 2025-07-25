@@ -6,7 +6,6 @@ import (
 	"html"
 	"sync"
 
-	"github.com/krau/ManyACG/common"
 	"github.com/krau/ManyACG/config"
 	"github.com/krau/ManyACG/dao"
 	"github.com/krau/ManyACG/types"
