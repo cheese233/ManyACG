@@ -65,8 +65,8 @@ func SaveAll(ctx context.Context, artwork *types.Artwork, picture *types.Picture
 			common.Logger.Fatalf("Unknown storage type: %s", config.Cfg.Storage.RegularType)
 			return nil, fmt.Errorf("%w: %s", errs.ErrStorageUnkown, config.Cfg.Storage.RegularType)
 		}
-		regularOutputPath := fmt.Sprintf("%s_regular.%s", filePath[:len(filePath)-len(filepath.Ext(filePath))], config.Cfg.Storage.RegularFormat)
-		if err := common.CompressImageByFFmpeg(filePath, regularOutputPath, types.RegularPhotoSideLength); err != nil {
+		regularOutputPath := fmt.Sprintf("%s_regular.webp", filePath[:len(filePath)-len(filepath.Ext(filePath))])
+		if err := common.CompressImageFile(filePath, regularOutputPath, types.RegularPhotoSideLength, true); err != nil {
 			return nil, err
 		}
 		defer func() {
@@ -76,7 +76,7 @@ func SaveAll(ctx context.Context, artwork *types.Artwork, picture *types.Picture
 		if picture.ID == "" {
 			picture.ID = primitive.NewObjectID().Hex()
 		}
-		regularStorageFileName := picture.ID + "_regular." + config.Cfg.Storage.RegularFormat
+		regularStorageFileName := picture.ID + "_regular.webp"
 		regularStoragePath := fmt.Sprintf("/regular/%s/%s/%s", artwork.SourceType, artwork.Artist.UID, regularStorageFileName)
 
 		regularDetail, err = regularStorage.Save(ctx, regularOutputPath, regularStoragePath)
@@ -91,8 +91,8 @@ func SaveAll(ctx context.Context, artwork *types.Artwork, picture *types.Picture
 			common.Logger.Fatalf("Unknown storage type: %s", config.Cfg.Storage.ThumbType)
 			return nil, fmt.Errorf("%w: %s", errs.ErrStorageUnkown, config.Cfg.Storage.ThumbType)
 		}
-		thumbOutputPath := fmt.Sprintf("%s_thumb.%s", filePath[:len(filePath)-len(filepath.Ext(filePath))], config.Cfg.Storage.ThumbFormat)
-		if err := common.CompressImageByFFmpeg(filePath, thumbOutputPath, types.ThumbPhotoSideLength); err != nil {
+		thumbOutputPath := fmt.Sprintf("%s_thumb.webp", filePath[:len(filePath)-len(filepath.Ext(filePath))])
+		if err := common.CompressImageFile(filePath, thumbOutputPath, types.ThumbPhotoSideLength, false); err != nil {
 			return nil, err
 		}
 
@@ -103,7 +103,7 @@ func SaveAll(ctx context.Context, artwork *types.Artwork, picture *types.Picture
 		if picture.ID == "" {
 			picture.ID = primitive.NewObjectID().Hex()
 		}
-		thumbStorageFileName := picture.ID + "_thumb." + config.Cfg.Storage.ThumbFormat
+		thumbStorageFileName := picture.ID + "_thumb.webp"
 		thumbStoragePath := fmt.Sprintf("/thumb/%s/%s/%s", artwork.SourceType, artwork.Artist.UID, thumbStorageFileName)
 
 		thumbDetail, err = thumbStorage.Save(ctx, thumbOutputPath, thumbStoragePath)

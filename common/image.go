@@ -210,6 +210,7 @@ func CompressImageToJPEG(input []byte, maxEdgeLength, maxFileSize uint) ([]byte,
 }
 
 // 使用 ffmpeg 压缩图片
+// Deprecated: use common.CompressImageFile()
 func CompressImageByFFmpeg(inputPath, outputPath string, maxEdgeLength int) error {
 	file, err := os.Open(inputPath)
 	if err != nil {

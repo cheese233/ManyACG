@@ -68,6 +68,9 @@ func Run() {
 		telegram.RunPolling(ctx)
 	}
 
+	common.InitImage()
+	defer common.ShutdownImage()
+
 	go fetcher.StartScheduler(ctx)
 	if config.Cfg.API.Enable {
 		restful.Run(ctx)

@@ -21,12 +21,12 @@ RUN builtAt=${BUILT_AT:-$(date +'%F %T %z')} && \
     -X 'github.com/krau/ManyACG/common.Commit=$gitCommit' \
     -X 'github.com/krau/ManyACG/common.Version=$version'\
     " && \
-    CGO_ENABLED=0 go build -ldflags "$ldflags" -o manyacg
+    go build -ldflags "$ldflags" -o manyacg
 
 FROM alpine:latest
 WORKDIR /opt/manyacg/
 
-RUN apk add --no-cache bash ca-certificates ffmpeg && update-ca-certificates
+RUN apk add --no-cache bash ca-certificates vips && update-ca-certificates
 
 COPY --from=builder /app/manyacg .
 EXPOSE 39080

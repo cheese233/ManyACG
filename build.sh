@@ -9,4 +9,4 @@ ldflags="\
 -X 'github.com/krau/ManyACG/common.Version=$version'\
 "
 
-CGO_ENABLED=0 go build -ldflags "$ldflags" -o manyacg
+go build -ldflags "$ldflags" -o manyacg

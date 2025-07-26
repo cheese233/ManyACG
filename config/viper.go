@@ -92,8 +92,8 @@ func InitConfig() {
 	viper.SetDefault("storage.cache_ttl", 86400)
 	viper.SetDefault("storage.local.path", "./manyacg")
 	viper.SetDefault("storage.alist.token_expire", 86400)
-	viper.SetDefault("storage.regular_format", "webp")
-	viper.SetDefault("storage.thumb_format", "webp")
+	// viper.SetDefault("storage.regular_format", "webp")
+	// viper.SetDefault("storage.thumb_format", "webp")
 	viper.SetDefault("storage.telegram.api_url", "https://api.telegram.org")
 
 	viper.SetDefault("telegram.sleep", 3)

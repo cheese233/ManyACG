@@ -29,7 +29,7 @@ require (
 	github.com/u2takey/ffmpeg-go v0.5.0
 	go.mongodb.org/mongo-driver v1.17.4
 	golang.org/x/crypto v0.40.0
-	golang.org/x/image v0.28.0
+	golang.org/x/image v0.29.0
 )
 
 require (
@@ -42,6 +42,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
+	github.com/davidbyttow/govips/v2 v2.16.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect

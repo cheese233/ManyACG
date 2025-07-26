@@ -92,7 +92,7 @@ func StoragePictureRegularAndThumbAndUpdate(ctx context.Context, picture *types.
 		}()
 
 		regularPath := migrateDir + picture.ID.Hex() + "_regular.webp"
-		if err := common.CompressImageByFFmpeg(originalPath, regularPath, types.RegularPhotoSideLength); err != nil {
+		if err := common.CompressImageFile(originalPath, regularPath, types.RegularPhotoSideLength, true); err != nil {
 			return nil, err
 		}
 		defer func() {
@@ -110,7 +110,7 @@ func StoragePictureRegularAndThumbAndUpdate(ctx context.Context, picture *types.
 		}
 
 		thumbPath := migrateDir + picture.ID.Hex() + "_thumb.webp"
-		if err := common.CompressImageByFFmpeg(originalPath, thumbPath, types.ThumbPhotoSideLength); err != nil {
+		if err := common.CompressImageFile(originalPath, thumbPath, types.ThumbPhotoSideLength, false); err != nil {
 			return nil, err
 		}
 		defer func() {
