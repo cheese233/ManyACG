@@ -1,7 +1,11 @@
 FROM golang:alpine AS builder
 WORKDIR /app
 
-RUN apk add --no-cache git bash build-base
+RUN apk add --no-cache git bash build-base pkgconf
+
+RUN apk add --update --no-cache \
+    --repository http://dl-3.alpinelinux.org/alpine/edge/community --repository http://dl-3.alpinelinux.org/alpine/edge/main \
+    vips-dev
 
 COPY go.mod go.sum ./
 RUN go mod download
@@ -27,10 +31,6 @@ FROM alpine:latest
 WORKDIR /opt/manyacg/
 
 RUN apk add --no-cache bash ca-certificates libc6-compat libgcc libstdc++ && update-ca-certificates
-
-RUN apk add --update --no-cache \
-    --repository http://dl-3.alpinelinux.org/alpine/edge/community --repository http://dl-3.alpinelinux.org/alpine/edge/main \
-    vips-dev
 
 COPY --from=builder /app/manyacg .
 EXPOSE 39080
