@@ -2,8 +2,10 @@ package telegram
 
 import (
 	"context"
+	"net/url"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/krau/ManyACG/common"
 	"github.com/krau/ManyACG/config"
 	"github.com/krau/ManyACG/service"
@@ -147,6 +149,53 @@ func InitBot(ctx context.Context) {
 	}
 }
 
+func SetWebHook(ctx context.Context, router gin.IRouter) {
+	if Bot == nil {
+		InitBot(ctx)
+	}
+	parsedHost, err := url.Parse(config.Cfg.API.Host)
+	if err != nil {
+		common.Logger.Panicf("Error when setting webhook: %s", err)
+	}
+	BotURL = "/bot"
+	_ = Bot.SetWebhook(ctx, &telego.SetWebhookParams{
+		URL:         parsedHost.ResolveReference(&url.URL{Path: BotURL}).String(),
+		SecretToken: Bot.SecretToken(),
+	})
+	common.Logger.Info("Init Webhook")
+	updates, err := Bot.UpdatesViaWebhook(ctx, WebhookGin(router, BotURL, Bot.SecretToken()))
+	if err != nil {
+		common.Logger.Panicf("Error when setting webhook: %s", err)
+	}
+	botHandler, err := telegohandler.NewBotHandler(Bot, updates)
+	if err != nil {
+		common.Logger.Panicf("Error when creating bot handler: %s", err)
+	}
+	go func() {
+		<-ctx.Done()
+		stopCtx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		defer cancel()
+		if err := botHandler.StopWithContext(stopCtx); err != nil {
+			common.Logger.Warnf("Error when stopping bot handler: %s", err)
+		}
+		common.Logger.Info("Stopped bot handler")
+	}()
+	if !config.Cfg.Debug {
+		botHandler.Use(telegohandler.PanicRecovery())
+	}
+	botHandler.Use(messageLogger)
+
+	baseGroup := botHandler.BaseGroup()
+	handlers.RegisterHandlers(baseGroup)
+	go func() {
+		if err := botHandler.Start(); err != nil {
+			common.Logger.Panicf("Error when starting bot handler: %s", err)
+		}
+	}()
+	go startService()
+}
+
+// Deprecated: now use webhook
 func RunPolling(ctx context.Context) {
 	if Bot == nil {
 		InitBot(ctx)

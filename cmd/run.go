@@ -20,7 +20,6 @@ import (
 	"github.com/krau/ManyACG/service"
 	"github.com/krau/ManyACG/sources"
 	"github.com/krau/ManyACG/storage"
-	"github.com/krau/ManyACG/telegram"
 	"github.com/krau/ManyACG/webassets"
 )
 
@@ -64,9 +63,9 @@ func Run() {
 	service.InitService(ctx)
 	sources.InitSources(service.NewService())
 	storage.InitStorage(ctx)
-	if config.Cfg.Telegram.Token != "" {
-		telegram.RunPolling(ctx)
-	}
+	// if config.Cfg.Telegram.Token != "" {
+	// 	telegram.RunPolling(ctx)
+	// }
 
 	common.InitImage()
 	defer common.ShutdownImage()

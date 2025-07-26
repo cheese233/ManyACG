@@ -10,6 +10,7 @@ import (
 	"github.com/krau/ManyACG/api/restful/routers"
 	"github.com/krau/ManyACG/common"
 	"github.com/krau/ManyACG/config"
+	"github.com/krau/ManyACG/telegram"
 
 	"github.com/penglongli/gin-metrics/ginmetrics"
 
@@ -77,9 +78,14 @@ func Run(ctx context.Context) {
 					<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
 				</body>
 				</html>
-			`,config.Cfg.API.AllowedOrigins[0],config.Cfg.API.AllowedOrigins[0])))
+			`, config.Cfg.API.AllowedOrigins[0], config.Cfg.API.AllowedOrigins[0])))
 		})
 	}
+
+	if config.Cfg.Telegram.Token != "" {
+		telegram.SetWebHook(ctx, r)
+	}
+
 	server := &http.Server{
 		Addr:    config.Cfg.API.Address,
 		Handler: r,
