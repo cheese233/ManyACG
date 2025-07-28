@@ -25,9 +25,10 @@ func Run(ctx context.Context) {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	r := gin.Default()
+	r := gin.New()
 
-	r.Use(common.SlogMiddleware(common.Logger))
+	r.Use(common.GinSlogMiddleware(common.Logger))
+	r.Use(gin.Recovery())
 
 	if config.Cfg.API.Metrics {
 		metrics := ginmetrics.GetMonitor()

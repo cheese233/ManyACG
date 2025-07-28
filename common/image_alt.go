@@ -70,6 +70,7 @@ func CompressImageForTelegramFromBytes(input []byte) ([]byte, error) {
 
 func InitImage() {
 	vips.Startup(nil)
+	vips.LoggingSettings(VipsLogger, vips.LogLevelDebug)
 }
 
 func ShutdownImage() {
