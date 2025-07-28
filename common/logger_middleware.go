@@ -12,7 +12,7 @@ func SlogMiddleware(logger *slog.Logger) gin.HandlerFunc {
 		start := time.Now()
 		c.Next()
 		latency := time.Since(start)
-		logger.Info("incoming request",
+		logger.Info("request",
 			slog.M{"method": c.Request.Method,
 				"path":      c.Request.URL.Path,
 				"status":    c.Writer.Status(),
