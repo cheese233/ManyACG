@@ -15,10 +15,11 @@ func GinSlogMiddleware(logger *slog.Logger) gin.HandlerFunc {
 		latency := time.Since(start)
 		logger.Trace("request",
 			slog.M{"method": c.Request.Method,
-				"path":      c.Request.URL.Path,
-				"status":    c.Writer.Status(),
-				"latency":   latency,
-				"client_ip": c.ClientIP(),
+				"URL":        c.Request.URL.String(),
+				"status":     c.Writer.Status(),
+				"latency":    latency,
+				"client_ip":  c.ClientIP(),
+				"user_agent": c.Request.UserAgent(),
 			},
 		)
 	}
@@ -41,5 +42,5 @@ func VipsLogger(messageDomain string, verbosity vips.LogLevel, message string) {
 		logLevel = slog.TraceLevel
 	}
 
-	Logger.Logf(logLevel, "[%v.%v] %v", messageDomain, verbosity, message)
+	Logger.Logf(logLevel, "[%v] %v", messageDomain, message)
 }
