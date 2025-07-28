@@ -27,6 +27,8 @@ func Run(ctx context.Context) {
 
 	r := gin.Default()
 
+	r.Use(common.SlogMiddleware(common.Logger))
+
 	if config.Cfg.API.Metrics {
 		metrics := ginmetrics.GetMonitor()
 		metrics.SetMetricPath("/metrics")
