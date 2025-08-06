@@ -2,6 +2,7 @@ package kemono
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 
 	"github.com/imroc/req/v3"
@@ -9,10 +10,10 @@ import (
 
 var (
 	reqClient            *req.Client
-	kemonoSourceURLRegex = regexp.MustCompile(`kemono\.su/\w+/user/\d+/post/\d+`)
-	apiBaseURL           = "https://kemono.su/api/v1"
-	cdnBaseURL           = "https://c1.kemono.su/data"
-	thumbnailsBaseURL    = "https://img.kemono.su/thumbnail/data"
+	kemonoSourceURLRegex = regexp.MustCompile(`kemono\.(su|cr)/\w+/user/\d+/post/\d+`)
+	kemonoDomainBase     = "https://kemono.cr"
+	apiBaseURL           = fmt.Sprintf("%s/api/v1", kemonoDomainBase)
+	thumbnailsBase       = "https://img.kemono.cr/thumbnail/data"
 )
 
 var (

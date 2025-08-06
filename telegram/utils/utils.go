@@ -27,7 +27,7 @@ func GetMessageIDs(messages []telego.Message) []int {
 	return ids
 }
 
-func GetMssageOriginChannel(message telego.Message) *telego.MessageOriginChannel {
+func GetMssageOriginChannel(message *telego.Message) *telego.MessageOriginChannel {
 	if message.ForwardOrigin == nil {
 		return nil
 	}
@@ -39,18 +39,18 @@ func GetMssageOriginChannel(message telego.Message) *telego.MessageOriginChannel
 }
 
 /*
-	检查目标消息是否为频道的作品消息
+	检查目标消息所回复的消息是否为一个频道的消息
 
 如果是，返回 messageOriginChannel 和 true
 */
-func GetMessageOriginChannelArtworkPost(message telego.Message) (*telego.MessageOriginChannel, bool) {
+func GetReplyToMessageOriginChannel(message telego.Message) (*telego.MessageOriginChannel, bool) {
 	if message.ReplyToMessage == nil {
 		return nil, false
 	}
 	if message.ReplyToMessage.Photo == nil || message.ReplyToMessage.ForwardOrigin == nil {
 		return nil, false
 	}
-	messageOriginChannel := GetMssageOriginChannel(*message.ReplyToMessage)
+	messageOriginChannel := GetMssageOriginChannel(message.ReplyToMessage)
 	if messageOriginChannel == nil {
 		return nil, false
 	}
@@ -284,31 +284,22 @@ func SendPictureFileByID(ctx context.Context, bot *telego.Bot, message telego.Me
 	return documentMessage, nil
 }
 
-func GetPicturePreviewInputFile(ctx context.Context, picture *types.Picture) (*telego.InputFile, bool, error) {
+// GetPicturePreviewInputFile 获取图片预览的 InputFile
+func GetPicturePreviewInputFile(ctx context.Context, picture *types.Picture) (*telego.InputFile, error) {
 	if picture.TelegramInfo != nil && picture.TelegramInfo.PhotoFileID != "" {
 		inputFile := telegoutil.FileFromID(picture.TelegramInfo.PhotoFileID)
-		return &inputFile, false, nil
+		return &inputFile, nil
 	}
 	cacheFile, err := common.GetReqCachedFile(picture.Original)
 	if err == nil {
 		fileBytes, err := common.CompressImageForTelegramFromBytes(cacheFile)
 		if err != nil {
-			return nil, false, err
+			return nil, err
 		}
-		inputFile := telegoutil.File(telegoutil.NameReader(bytes.NewReader(fileBytes), picture.Original))
-		return &inputFile, false, nil
+		inputFile := telegoutil.File(telegoutil.NameReader(bytes.NewReader(fileBytes), picture.GetFileName()))
+		return &inputFile, nil
 	}
-	if botPhotoFileID := service.GetEtcData(ctx, "bot_photo_file_id"); botPhotoFileID != nil {
-		inputFile := telegoutil.FileFromID(botPhotoFileID.(string))
-		return &inputFile, true, nil
-	}
-	if botPhotoFileBytes := service.GetEtcData(ctx, "bot_photo_bytes"); botPhotoFileBytes != nil {
-		if data, ok := botPhotoFileBytes.(primitive.Binary); ok {
-			inputFile := telegoutil.File(telegoutil.NameReader(bytes.NewReader(data.Data), picture.Original))
-			return &inputFile, true, nil
-		}
-	}
-	return nil, true, errs.ErrNoAvailableFile
+	return nil, errs.ErrNoAvailableFile
 }
 
 func ParseCommandBy(text string, splitChar, quoteChar string) (string, string, []string) {
