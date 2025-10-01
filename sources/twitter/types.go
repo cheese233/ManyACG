@@ -67,8 +67,8 @@ func (resp *FxTwitterApiResp) ToArtwork() (*types.Artwork, error) {
 	for i, photo := range media.Photos {
 		pictures = append(pictures, &types.Picture{
 			Index:     uint(i),
-			Thumbnail: photo.URL + "?name=medium",
-			Original:  photo.URL + "?name=orig",
+			Thumbnail: picUrl + "?name=medium",
+			Original:  picUrl + "?name=orig",
 			Width:     uint(photo.Width),
 			Height:    uint(photo.Height),
 		})
